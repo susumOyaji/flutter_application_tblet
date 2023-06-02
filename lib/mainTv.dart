@@ -1,9 +1,9 @@
-import 'dart:convert';
+//import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'package:http/http.dart';
+//import 'package:http/http.dart';
 //import 'package:html/parser.dart' as html;
 import 'package:html/parser.dart' as parser;
 //import 'dart:io';
@@ -18,9 +18,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       //title: 'Stock Data',
-      home: _MyHomePage(),
+      theme: ThemeData(
+        canvasColor: const Color.fromARGB(255, 10, 10, 10), // ベースカラーを変更する
+      ),
+      home: const _MyHomePage(),
     );
   }
 }
@@ -132,7 +135,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     super.initState();
     //_data = _fetchStockData();
     //_data = _fetchStockTv();
-    returnMap = _fetchStockTv(idoldata[0][0]);
+    returnMap = _fetchStockTv("HiHi jets");
   }
 
   void _refreshData() {
@@ -154,52 +157,95 @@ class _MyHomePageState extends State<_MyHomePage> {
         borderRadius: BorderRadius.circular(10),
         color: const Color.fromARGB(255, 56, 50, 50),
       ),
-      child: Row(
+      child: Column(
+        mainAxisAlignment:MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ElevatedButton(
-            style: const ButtonStyle(
-              alignment: Alignment.centerLeft, // ボタン名を中央に配置
+          Container(
+            width: 500,
+            height: 30,
+            color: Colors.blue,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      // TODO: ボタン1の処理
+                    });
+                  },
+                  child: const Text('Button 1'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      // TODO: ボタン2の処理
+                    });
+                  },
+                  child: const Text('Button 2'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      // TODO: ボタン3の処理
+                    });
+                  },
+                  child: const Text('Button 3'),
+                ),
+              ],
             ),
-            onPressed: () {
-              // ボタンが押された時の処理
-              setState(() {
-                returnMap = _fetchStockTv(idoldata[0][0]);
-              });
-            },
-            child: const Text('Hi 1'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              // ボタンが押された時の処理
-              setState(() {
-                returnMap = _fetchStockTv(idoldata[1][0]);
-              });
-            },
-            child: const Text('K&P 2'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // ボタンが押された時の処理
-              setState(() {
-                returnMap = _fetchStockTv(idoldata[2][0]);
-              });
-            },
-            child: const Text('Button 3'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              fixedSize: const Size(100, 50),
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
+          Container(
+            width: 500,
+            height: 30,
+            color: Colors.green,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      returnMap = _fetchStockTv("HiHi jets");
+                    });
+                  },
+                  child: const Text('Hi 1'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      returnMap = _fetchStockTv("King&Prince");
+                    });
+                  },
+                  child: const Text('KP 1'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      returnMap = _fetchStockTv("永瀬廉");
+                    });
+                  },
+                  child: const Text('NA 1'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      returnMap = _fetchStockTv(idoldata[0][0]);
+                    });
+                  },
+                  child: const Text('Hi 1'),
+                ),
+              ],
             ),
-            child: const Text(
-              "Reshio",
-              style: TextStyle(color: Colors.black, fontSize: 20),
-            ),
-            onPressed: () => _refreshData(), //_opneUrl(),
           ),
+
           // 右端のアイコン
           // 追加のボタンをここに追記
         ],
@@ -365,7 +411,7 @@ class _MyHomePageState extends State<_MyHomePage> {
                   height: 600,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Colors.orange,
+                    color: Color.fromARGB(255, 115, 6, 218),
                   ),
                   child: Column(children: <Widget>[
                     const SizedBox(
