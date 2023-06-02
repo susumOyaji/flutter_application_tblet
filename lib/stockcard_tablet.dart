@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:html/parser.dart' as parser;
 
-
 void main() async {
   runApp(const MyApp());
 }
@@ -37,35 +36,13 @@ class _MyHomePageState extends State<_MyHomePage> {
   EdgeInsets stdmargin =
       const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0);
 
-  
   Future<List<Map<String, dynamic>>>? returnMap;
-
-  String marktprice = "";
-  String inVestment = "";
-  String profit = "";
-  String marktpolarity = "";
 
   static List<List<dynamic>> data = [
     ["6758", 200, 1665],
     ["6976", 100, 1801],
     ["3436", 0, 0],
   ];
-
- 
-
-  Future<String> _fetchStd(String code) async {
-    final url = code; //'https://finance.yahoo.co.jp/quote/$code.T';
-    const backendUrl = 'http://localhost:3000'; // バックエンドのURL
-
-    final uri = Uri.parse(backendUrl); // バックエンドのURLをURIオブジェクトに変換
-    final response = await http.get(uri.replace(queryParameters: {'url': url}));
-    if (response.statusCode == 200) {
-      //print(response.body); // レスポンスのボディを出力
-      return response.body; // レスポンスのボディを返す
-    } else {
-      throw Exception('Request failed with status: ${response.statusCode}');
-    }
-  }
 
   Future<List<Map<String, dynamic>>> webfetch() async {
     List<Map<String, dynamic>> dataList = [];
@@ -207,13 +184,10 @@ class _MyHomePageState extends State<_MyHomePage> {
     return mapString;
   }
 
- 
- 
-
   @override
   void initState() {
     super.initState();
- 
+
     returnMap = webfetch();
   }
 

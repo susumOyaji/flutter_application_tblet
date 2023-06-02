@@ -53,22 +53,10 @@ class _MyHomePageState extends State<_MyHomePage> {
     ["johnnys", 0, 0],
   ];
 
-  Future<String> _fetchStd(String code) async {
-    final url = code; //'https://finance.yahoo.co.jp/quote/$code.T';
-    const backendUrl = 'http://localhost:3000'; // バックエンドのURL
-
-    final uri = Uri.parse(backendUrl); // バックエンドのURLをURIオブジェクトに変換
-    final response = await http.get(uri.replace(queryParameters: {'url': url}));
-    if (response.statusCode == 200) {
-      //print(response.body); // レスポンスのボディを出力
-      return response.body; // レスポンスのボディを返す
-    } else {
-      throw Exception('Request failed with status: ${response.statusCode}');
-    }
-  }
+ 
 
   Future<List<Map<String, dynamic>>> _fetchStockTv(String idol) async {
-    int count = 11;
+    int count = 10;
     List<Map<String, dynamic>> dataList = [];
 
     String originalString = idol;
@@ -79,9 +67,7 @@ class _MyHomePageState extends State<_MyHomePage> {
         'https://www.tvkingdom.jp/schedulesBySearch.action?stationPlatformId=0&condition.keyword=$encodedString&submit=%E6%A4%9C%E7%B4%A2'; //←ここに表示させたいURLを入力する
     //https://bangumi.org/search?q=HiHi+jets&area_code=23
     // URLから応答を取得します。
-    //final tvresponse = await _fetchStd(url);
-    //final tvbody = parser.parse(tvresponse);
-    final uri = Uri.parse(url); // バックエンドのURLをURIオブジェクトに変換
+    final uri = Uri.parse(url); // URLをURIオブジェクトに変換
 
     final tvresponse = await http.get(uri);
 
@@ -89,29 +75,29 @@ class _MyHomePageState extends State<_MyHomePage> {
 
     final tvspanElements = tvbody.querySelectorAll('h2').toList();
     if (tvspanElements.length < count) {
-      count = (tvspanElements.length) - 1;
+      count = (tvspanElements.length) - 2;
     }
 
     final limitedElements = tvspanElements.sublist(0, count); // 最初のcount要素のみを取得
 
-    final tvspanTexts =
-        tvspanElements.map((spanElement) => spanElement.text).toList();
+    //final tvspanTexts =
+    //    tvspanElements.map((spanElement) => spanElement.text).toList();
 
     String? nextText;
     String trimmedText;
 
     List<String> codeArray = [];
-    int index = 0; // カウンタ変数
+    //int index = 0; // カウンタ変数
 
     for (final element in limitedElements) {
       final nextElement = element.nextElementSibling;
       if (nextElement != null) {
-        nextText = nextElement.text;
+        nextText = nextElement.text;//next to 一つ下階層
         trimmedText = nextText.replaceAll('\n', '');
         codeArray = trimmedText.split(' ');
 
         Map<String, dynamic> mapString = {
-          "Title": tvspanTexts[index],
+          "Title": element.text,
           "Date": codeArray[0],
           "Day": codeArray[1],
           "StartTime": codeArray[2],
@@ -123,7 +109,7 @@ class _MyHomePageState extends State<_MyHomePage> {
         };
         // オブジェクトをリストに追加
         dataList.add(mapString);
-        index++; // インクリメント
+        //index++; // インクリメント
       }
     }
 
@@ -133,8 +119,7 @@ class _MyHomePageState extends State<_MyHomePage> {
   @override
   void initState() {
     super.initState();
-    //_data = _fetchStockData();
-    //_data = _fetchStockTv();
+  
     returnMap = _fetchStockTv("HiHi jets");
   }
 
@@ -411,7 +396,7 @@ class _MyHomePageState extends State<_MyHomePage> {
                   height: 600,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Color.fromARGB(255, 115, 6, 218),
+                    color: const Color.fromARGB(255, 115, 6, 218),
                   ),
                   child: Column(children: <Widget>[
                     const SizedBox(
