@@ -41,11 +41,7 @@ class _MyHomePageState extends State<_MyHomePage> {
       const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0);
 
   Future<List<Map<String, dynamic>>>? returnMap;
-
-  //String marktprice = "";
-  //String inVestment = "";
-  //String profit = "";
-  //String marktpolarity = "";
+  TextEditingController _searchController = TextEditingController();
 
   static List<List<dynamic>> idoldata = [
     ["HiHi jets", 200, 1665],
@@ -53,10 +49,29 @@ class _MyHomePageState extends State<_MyHomePage> {
     ["johnnys", 0, 0],
   ];
 
- 
+  List<String> dataList = [
+    'Apple',
+    'Banana',
+    'Orange',
+    'Grapes',
+    'Watermelon',
+    'Mango',
+    'Pineapple',
+    'Strawberry',
+  ];
+
+  List<String> filteredList = [];
+
+  void filterData(String keyword) {
+    setState(() {
+      filteredList = dataList
+          .where((item) => item.toLowerCase().contains(keyword.toLowerCase()))
+          .toList();
+    });
+  }
 
   Future<List<Map<String, dynamic>>> _fetchStockTv(String idol) async {
-    int count = 10;
+    int count = 0;
     List<Map<String, dynamic>> dataList = [];
 
     String originalString = idol;
@@ -74,14 +89,11 @@ class _MyHomePageState extends State<_MyHomePage> {
     final tvbody = parser.parse(tvresponse.body);
 
     final tvspanElements = tvbody.querySelectorAll('h2').toList();
-    if (tvspanElements.length < count) {
-      count = (tvspanElements.length) - 2;
-    }
+    //if (tvspanElements.length < count) {
+    count = (tvspanElements.length) - 2;
+    //}
 
     final limitedElements = tvspanElements.sublist(0, count); // 最初のcount要素のみを取得
-
-    //final tvspanTexts =
-    //    tvspanElements.map((spanElement) => spanElement.text).toList();
 
     String? nextText;
     String trimmedText;
@@ -92,7 +104,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     for (final element in limitedElements) {
       final nextElement = element.nextElementSibling;
       if (nextElement != null) {
-        nextText = nextElement.text;//next to 一つ下階層
+        nextText = nextElement.text; //next to 一つ下階層
         trimmedText = nextText.replaceAll('\n', '');
         codeArray = trimmedText.split(' ');
 
@@ -119,7 +131,7 @@ class _MyHomePageState extends State<_MyHomePage> {
   @override
   void initState() {
     super.initState();
-  
+
     returnMap = _fetchStockTv("HiHi jets");
   }
 
@@ -128,6 +140,14 @@ class _MyHomePageState extends State<_MyHomePage> {
       print("_refreshData");
       returnMap = _fetchStockTv("HiHi jets");
     });
+  }
+
+  void _startSearch() {
+    String keyword = _searchController.text;
+    // 検索処理を実行するコードを追加
+
+    // 例: デバッグログにキーワードを表示
+    print('Search keyword: $keyword');
   }
 
   Container stackmarketView(String msg) => Container(
@@ -143,13 +163,13 @@ class _MyHomePageState extends State<_MyHomePage> {
         color: const Color.fromARGB(255, 56, 50, 50),
       ),
       child: Column(
-        mainAxisAlignment:MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        //mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 500,
-            height: 30,
+            width: 800,
+            height: 50,
             color: Colors.blue,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -181,6 +201,54 @@ class _MyHomePageState extends State<_MyHomePage> {
                   },
                   child: const Text('Button 3'),
                 ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      // TODO: ボタン3の処理
+                    });
+                  },
+                  child: const Text('Button 4'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // ボタンが押された時の処理
+                    setState(() {
+                      // TODO: ボタン3の処理
+                    });
+                  },
+                  child: const Text('Button 5'),
+                ),
+                Container(
+                  width: 150,
+                  height: 50,
+                  alignment: Alignment.center,
+                  child: TextField(
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                    decoration: const InputDecoration(
+                      //hintText: '検索ワードを入力してください',
+                      labelText: 'Search',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onSubmitted: (String value) async {
+                      //final results = await searchQiita("value");
+                      //setState(() => articles = results);
+                    },
+                  ),
+                )
+                // 検索ボックス
+                //Padding(
+                //padding: EdgeInsets.all(16.0),
+                //child: TextField(
+                //  onChanged: filterData,
+                //  decoration: InputDecoration(
+                //    labelText: 'Search',
+                //    prefixIcon: Icon(Icons.search),
+                //  ),
+                //),
+                //),
               ],
             ),
           ),
