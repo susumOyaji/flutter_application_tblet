@@ -63,9 +63,9 @@ class _MyHomePageState extends State<_MyHomePage> {
     Map<String, dynamic> djimapString = {
       "Code": "^DJI",
       "Name": "^DJI",
-      "Price": djispanTexts[18],
-      "Reshio": djispanTexts[25],
-      "Percent": djispanTexts[28],
+      "Price": djispanTexts[19],
+      "Reshio": djispanTexts[24],
+      "Percent": djispanTexts[29],
       "Polarity": djipolarity,
       "Banefits": "Unused",
       "Evaluation": "Unused"
@@ -125,10 +125,11 @@ class _MyHomePageState extends State<_MyHomePage> {
       String anypolarity = anyfirstChar == '-' ? '-' : '+';
 
       int intHolding = data[i][1];
+      String price=spanTexts[21].replaceAll('.', '');
 
-      int intPrice = spanTexts[21] == '---'
+      int intPrice = (price) == '---'
           ? 0
-          : int.parse(spanTexts[21].replaceAll(',', ''));
+          : int.parse(price.replaceAll(',', ''));
 
       num banefits = intPrice - data[i][2];
       String bBanefits = formatter.format(banefits); //banefits.toString();

@@ -6,6 +6,7 @@ import 'dart:async';
 //import 'package:http/http.dart';
 //import 'package:html/parser.dart' as html;
 import 'package:html/parser.dart' as parser;
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'dart:io';
 
 void main() async {
@@ -42,6 +43,7 @@ class _MyHomePageState extends State<_MyHomePage> {
 
   Future<List<Map<String, dynamic>>>? returnMap;
   TextEditingController _searchController = TextEditingController();
+  int _counter = 0;
 
   static List<List<dynamic>> idoldata = [
     ["HiHi jets", 200, 1665],
@@ -133,6 +135,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     super.initState();
 
     returnMap = _fetchStockTv("HiHi jets");
+    _loadCounter();
   }
 
   void _refreshData() {
@@ -148,6 +151,34 @@ class _MyHomePageState extends State<_MyHomePage> {
 
     // 例: デバッグログにキーワードを表示
     print('Search keyword: $keyword');
+  }
+
+   Future<void> _loadCounter() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? savedData = prefs.getStringList('idoldata');
+
+    if (savedData != null) {
+      setState(() {
+         idoldata = savedData.map((row) => row.split(',')).toList();
+      });
+    }
+  }
+
+  Future<void> _saveData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> flattenedData = idoldata.map((row) => row.join(',')).toList();
+    await prefs.setStringList('data', flattenedData);
+  }
+
+
+
+  Future<void> _incrementCounter() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int updatedCounter = _counter + 1;
+    await prefs.setInt('counter', updatedCounter);
+    setState(() {
+      _counter = updatedCounter;
+    });
   }
 
   Container stackmarketView(String msg) => Container(
