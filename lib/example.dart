@@ -32,7 +32,7 @@ class _MyHomePageState extends State<_MyHomePage> {
   void initState() {
     super.initState();
     //deleteData();
-    //loadData();
+    loadData();
   }
 
   @override
@@ -56,6 +56,47 @@ class _MyHomePageState extends State<_MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            addData([data.length + 1, 'Text 1', 'Text 2']);
+                          },
+                          child:
+                              Text(data[0][1] == "" ? 'Button 1' : data[0][1]),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            addData([data.length + 1, 'Text 1', 'Text 2']);
+                          },
+                          child: Text(data[1][1] == "" ? 'Button 2' : data[1][1]),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            addData([data.length + 1, 'Text 1', 'Text 2']);
+                          },
+                          child: Text(data[3][1] == "" ? 'Button 3' : data[3][1]),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            addData([data.length + 1, 'Text 1', 'Text 2']);
+                          },
+                          child: const Text('Button 3'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            addData([data.length + 1, 'Text 1', 'Text 2']);
+                          },
+                          child: const Text('Button 4'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            addData([data.length + 1, 'Text 1', 'Text 2']);
+                          },
+                          child: const Text('Button 5'),
+                        ),
+                      ],
+                    ),
                     const Text('Saved Data:'),
                     for (var item in data) Text(item.toString()),
                     ElevatedButton(
@@ -100,10 +141,39 @@ class _MyHomePageState extends State<_MyHomePage> {
     await prefs.setString('data', encodedData);
   }
 
-  Future<void> addData(List<dynamic> newData) async {
+  Future<void> addData1(List<dynamic> newData) async {
     List<List<dynamic>> data = await loadData();
     data.add(newData);
     await saveData(data);
+  }
+
+  Future<void> addData(List<dynamic> newData) async {
+    List<List<dynamic>> data = await loadData();
+
+    // IDの重複チェック
+    bool isDuplicateId = false;
+    int newId = newData[0] as int;
+    for (List<dynamic> existingData in data) {
+      int existingId = existingData[0] as int;
+      if (existingId == newId) {
+        isDuplicateId = true;
+        break;
+      }
+    }
+
+    if (!isDuplicateId) {
+      // 新しいデータを追加
+      data.add(newData);
+
+      // IDで昇順ソート
+      data.sort((a, b) => (a[0] as int).compareTo(b[0] as int));
+
+      await saveData(data);
+      print('Data added and sorted successfully.');
+    } else {
+      print(
+          'Data with the same ID already exists. Duplicate registration prevented.');
+    }
   }
 
   Future<void> removeData(int index) async {
