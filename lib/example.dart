@@ -28,6 +28,9 @@ class _MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<_MyHomePage> {
+  List<String> buttonNames = List.generate(5, (index) => 'Button ${index + 1}');
+  bool isNameChanged = false;
+
   @override
   void initState() {
     super.initState();
@@ -56,46 +59,25 @@ class _MyHomePageState extends State<_MyHomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        ElevatedButton(
+                    Column(
+                      children: List.generate(5, (index) {
+                        return ElevatedButton(
                           onPressed: () {
-                            addData([data.length + 1, 'Text 1', 'Text 2']);
+                            //isNameChanged = !isNameChanged;//faluse to true
+                            setState(() {
+                              if (isNameChanged && index < data.length) {
+                                // 新たな名前に変更
+                                buttonNames[index] = data[index][1];
+                              } else {
+                                // 初期値に戻す
+                                buttonNames[index] = 'Button ${index + 1}';
+                              }
+                              isNameChanged = !isNameChanged;//true to faluse
+                            });
                           },
-                          child:
-                              Text(data[0][1] == "" ? 'Button 1' : data[0][1]),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            addData([data.length + 1, 'Text 1', 'Text 2']);
-                          },
-                          child: Text(data[1][1] == "" ? 'Button 2' : data[1][1]),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            addData([data.length + 1, 'Text 1', 'Text 2']);
-                          },
-                          child: Text(data[3][1] == "" ? 'Button 3' : data[3][1]),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            addData([data.length + 1, 'Text 1', 'Text 2']);
-                          },
-                          child: const Text('Button 3'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            addData([data.length + 1, 'Text 1', 'Text 2']);
-                          },
-                          child: const Text('Button 4'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            addData([data.length + 1, 'Text 1', 'Text 2']);
-                          },
-                          child: const Text('Button 5'),
-                        ),
-                      ],
+                          child: Text(buttonNames[index]),
+                        );
+                      }),
                     ),
                     const Text('Saved Data:'),
                     for (var item in data) Text(item.toString()),
