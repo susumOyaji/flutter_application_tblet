@@ -6,11 +6,6 @@ void main() {
   runApp(const MyApp());
 }
 
-
-
-
-
-
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
@@ -18,10 +13,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  List<String> buttonNames =
+      List.generate(10, (index) => 'Button ${index + 1}');
+  bool isNameChanged = false;
+  final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController2 = TextEditingController();
+  late List<Map<String, dynamic>> newData;
+
   List<Map<String, dynamic>> dataList = [
-    {'Id': 1, 'DisplayWord': 'HiHi jets','SearchWord':'HiHijets'},
-    {'Id': 2, 'DisplayWord': 'HiHi jets','SearchWord':'HiHijets'},
-    {'Id': 3, 'DisplayWord': 'HiHi jets','SearchWord':'HiHijets'},
+    {'Id': 1, 'DisplayWord': 'HiHi jets', 'SearchWord': 'HiHijets'},
+    {'Id': 2, 'DisplayWord': 'HiHi jets', 'SearchWord': 'HiHijets'},
+    {'Id': 3, 'DisplayWord': 'HiHi jets', 'SearchWord': 'HiHijets'},
   ];
 
   @override
@@ -42,10 +44,120 @@ class _MyAppState extends State<MyApp> {
     String? encodedData = prefs.getString('data');
     if (encodedData != null) {
       List<dynamic> decodedData = jsonDecode(encodedData);
+
       setState(() {
         dataList = decodedData.cast<Map<String, dynamic>>();
       });
     }
+  }
+
+  void addData1() {
+    setState(() {
+      dataList.add({'name': 'New Person', 'age': 20});
+      saveData();
+    });
+  }
+
+  Future<void> addData(Map<String, dynamic> newData) async {
+    //List<List<dynamic>> data = await loadData();
+
+    // IDの重複チェック
+    bool isDuplicateId = false;
+    int newId = newData[0] as int;
+    for (Map<String, dynamic> existingData in dataList) {
+      int existingId = existingData[0] as int;
+      if (existingId == newId) {
+        isDuplicateId = true;
+        break;
+      }
+    }
+
+    if (!isDuplicateId) {
+      // 新しいデータを追加
+      dataList.add(newData);
+
+      // IDで昇順ソート
+      dataList.sort((a, b) => (a[0] as int).compareTo(b[0] as int));
+
+      await saveData();
+      print('Data added and sorted successfully.');
+    } else {
+      print(
+          'Data with the same ID already exists. Duplicate registration prevented.');
+    }
+  }
+
+  void removeData(int index) {
+    setState(() {
+      dataList.removeAt(index);
+      saveData();
+    });
+  }
+
+  Future<void> deleteData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Remove data for the 'data' key.
+    await prefs.remove('dataList');
+  }
+
+  handleButtonLongPress(buttonIndex) {
+    //ButtonName and SearchWard 登録
+    print('Button $buttonIndex was Longpressed');
+    // ここにボタンが押されたときの処理を追加する
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Button $buttonIndex was Longpressed'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _textEditingController,
+                decoration: const InputDecoration(hintText: 'ButtonName'),
+              ),
+              TextField(
+                controller: _textEditingController2,
+                decoration: const InputDecoration(hintText: 'SearchWard'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                String enteredText = _textEditingController.text;
+                String enteredText2 = _textEditingController2.text;
+                // TODO: 入力されたテキストの処理
+                print('ButtonName: $enteredText');
+                print('Entered Text 2: $enteredText2');
+
+                setState(() {
+                  newData = [
+                    {
+                      'Id': 1,
+                      'DisplayWord': 'HiHi jets',
+                      'SearchWord': 'HiHijets'
+                    },
+                  ];
+
+                  //data.add(newData);
+                });
+                saveData(); // データを保存
+                //addData([buttonIndex, enteredText,  enteredText2]);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -58,29 +170,64 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  //handleButtonLongPress(index);
-                  /*  
-                  setState(() {
-                    if (isNameChanged && index < data.length) {
-                      // 新たな名前に変更
-                      buttonNames[index] = data[index][1];
-                    } else {
-                      // 初期値に戻す
-                      buttonNames[index] = 'Button ${index + 1}';
-                    }
-                    isNameChanged =
-                        !isNameChanged; // true to false or false to true
-                  });
-                  */
-                },
-                child: Text('buttonNames[index]'),
+              Container(
+                padding: const EdgeInsets.all(16.0), // 余白を追加する場合は適宜調整してください
+                child: Column(
+                  children: List.generate(2, (rowIndex) {
+                    return Row(
+                      children: List.generate(5, (columnIndex) {
+                        final index = rowIndex * 5 + columnIndex;
+                        return Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              handleButtonLongPress(index);
+                              /*
+                                    setState(() {
+                                      if (isNameChanged &&
+                                          index < data.length) {
+                                        // 新たな名前に変更
+                                        buttonNames[index] = data[index][1];
+                                      } else {
+                                        // 初期値に戻す
+                                        buttonNames[index] =
+                                            'Button ${index + 1}';
+                                      }
+                                      isNameChanged =
+                                          !isNameChanged; // true to false or false to true
+                                    });
+                                    */
+                            },
+                            child: Text(dataList.length > index
+                                ? dataList[index]["DisplayWord"]
+                                : buttonNames[index]),
+                          ),
+                        );
+                      }),
+                    );
+                  }),
+                ),
               ),
               const Text('Load Data:'),
               for (var item in dataList) Text(item.toString()),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    //addData([data.length + 1, 'Text 1', 'Text 2']);
+                  });
+                },
+                child: const Text('Add Data'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    deleteData();
+                    //removeData(data.length);
+                  });
+                },
+                child: const Text('Remove All Data'),
+              ),
             ],
           ),
         ),
