@@ -3,19 +3,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
+
+
+
+
+
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   List<Map<String, dynamic>> dataList = [
-    {'name': 'John', 'age': 25},
-    {'name': 'Alice', 'age': 30},
-    {'name': 'Bob', 'age': 35},
+    {'Id': 1, 'DisplayWord': 'HiHi jets','SearchWord':'HiHijets'},
+    {'Id': 2, 'DisplayWord': 'HiHi jets','SearchWord':'HiHijets'},
+    {'Id': 3, 'DisplayWord': 'HiHi jets','SearchWord':'HiHijets'},
   ];
 
   @override
