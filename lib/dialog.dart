@@ -47,6 +47,20 @@ class _MyHomePageState extends State<_MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? encodedData = prefs.getString('data');
     if (encodedData != null) {
+      List<dynamic> decodedData = json.decode(encodedData);
+      if (decodedData is List &&
+          decodedData.isNotEmpty &&
+          decodedData.first is List) {
+        return List<List<dynamic>>.from(decodedData);
+      }
+    }
+    return [];
+  }
+
+ Future<List<List<dynamic>>> loadData1() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? encodedData = prefs.getString('data');
+    if (encodedData != null) {
       return List<List<dynamic>>.from(json.decode(encodedData));
     } else {
       return [];
@@ -76,7 +90,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     }
   }
 
-  Future<void> loadData1() async {
+  Future<void> loadData3() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? encodedData = prefs.getString('data');
     if (encodedData != null) {
@@ -208,8 +222,8 @@ class _MyHomePageState extends State<_MyHomePage> {
                   //var anystock = stockDataList.sublist(2);
                   // stockDataList の表示
                   //for (var stockData in stockDataList) {
-                    print(stockDataList[0][0]);
-                    print(stockDataList[1][2]);
+                    //print(stockDataList[0][0]);
+                    //print(stockDataList[1][2]);
                    
                     //print(stockData);
                   //}

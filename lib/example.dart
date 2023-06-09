@@ -28,24 +28,86 @@ class _MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<_MyHomePage> {
-  List<String> buttonNames = List.generate(5, (index) => 'Button ${index + 1}');
+  List<String> buttonNames =
+      List.generate(10, (index) => 'Button ${index + 1}');
   bool isNameChanged = false;
+  final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController2 = TextEditingController();
+  late List<List<dynamic>> newData;
 
   @override
   void initState() {
     super.initState();
-    //deleteData();
+    deleteData();
     loadData();
   }
+
+   handleButtonLongPress(buttonIndex) {
+    //ButtonName and SearchWard 登録
+    print('Button $buttonIndex was Longpressed');
+    // ここにボタンが押されたときの処理を追加する
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Button $buttonIndex was Longpressed'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _textEditingController,
+                decoration: const InputDecoration(hintText: 'ButtonName'),
+              ),
+              TextField(
+                controller: _textEditingController2,
+                decoration: const InputDecoration(hintText: 'SearchWard'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                String enteredText = _textEditingController.text;
+                String enteredText2 = _textEditingController2.text;
+                // TODO: 入力されたテキストの処理
+                print('ButtonName: $enteredText');
+                print('Entered Text 2: $enteredText2');
+
+                setState(() {
+                   newData = [
+                    buttonIndex,
+                    //enteredText,
+                    //enteredText2
+                  ];
+                  //data.add(newData);
+                });
+                saveData(newData); // データを保存
+                //addData([buttonIndex, enteredText,  enteredText2]);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shared Preferences Example',
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Shared Preferences Example'),
-        ),
+        //appBar: AppBar(
+        //  title: const Text('Shared Preferences Example'),
+        //),
         body: FutureBuilder<List<List<dynamic>>>(
           future: loadData(),
           builder: (context, snapshot) {
@@ -57,41 +119,61 @@ class _MyHomePageState extends State<_MyHomePage> {
               List<List<dynamic>> data = snapshot.data!;
               return Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  // mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      children: List.generate(5, (index) {
-                        return ElevatedButton(
-                          onPressed: () {
-                            //isNameChanged = !isNameChanged;//faluse to true
-                            setState(() {
-                              if (isNameChanged && index < data.length) {
-                                // 新たな名前に変更
-                                buttonNames[index] = data[index][1];
-                              } else {
-                                // 初期値に戻す
-                                buttonNames[index] = 'Button ${index + 1}';
-                              }
-                              isNameChanged = !isNameChanged;//true to faluse
-                            });
-                          },
-                          child: Text(buttonNames[index]),
-                        );
-                      }),
+                    Container(
+                      padding: const EdgeInsets.all(16.0), // 余白を追加する場合は適宜調整してください
+                      child: Column(
+                        children: List.generate(2, (rowIndex) {
+                          return Row(
+                            children: List.generate(5, (columnIndex) {
+                              final index = rowIndex * 5 + columnIndex;
+                              return Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                     handleButtonLongPress(index);
+                                     /*
+                                    setState(() {
+                                      if (isNameChanged &&
+                                          index < data.length) {
+                                        // 新たな名前に変更
+                                        buttonNames[index] = data[index][1];
+                                      } else {
+                                        // 初期値に戻す
+                                        buttonNames[index] =
+                                            'Button ${index + 1}';
+                                      }
+                                      isNameChanged =
+                                          !isNameChanged; // true to false or false to true
+                                    });
+                                    */
+                                  },
+                                  child: Text(buttonNames[index]),
+                                ),
+                              );
+                            }),
+                          );
+                        }),
+                      ),
                     ),
                     const Text('Saved Data:'),
                     for (var item in data) Text(item.toString()),
                     ElevatedButton(
                       onPressed: () {
-                        addData([data.length + 1, 'Text 1', 'Text 2']);
+                        setState(() {
+                          addData([data.length + 1, 'Text 1', 'Text 2']);
+                        });
                       },
                       child: const Text('Add Data'),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        removeData(data.length);
+                        setState(() {
+                          deleteData();
+                          //removeData(data.length);
+                        });
                       },
-                      child: const Text('Remove Last Data'),
+                      child: const Text('Remove All Data'),
                     ),
                   ],
                 ),
