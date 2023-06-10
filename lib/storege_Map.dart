@@ -6,13 +6,27 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      //title: 'Stock Data',
+      theme: ThemeData(
+        canvasColor: const Color.fromARGB(255, 10, 10, 10), // ベースカラーを変更する
+      ),
+      home: const _MyHomePage(),
+    );
+  }
+}
+
+class _MyHomePage extends StatefulWidget {
+  const _MyHomePage({Key? key}) : super(key: key);
   @override
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<_MyHomePage> {
   List<String> buttonNames =
       List.generate(10, (index) => 'Button ${index + 1}');
   bool isNameChanged = false;
@@ -36,12 +50,12 @@ class _MyAppState extends State<MyApp> {
   Future<void> saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String encodedData = jsonEncode(dataList);
-    await prefs.setString('data', encodedData);
+    await prefs.setString('dataList', encodedData);
   }
 
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? encodedData = prefs.getString('data');
+    String? encodedData = prefs.getString('dataList');
     if (encodedData != null) {
       List<dynamic> decodedData = jsonDecode(encodedData);
 
@@ -63,9 +77,9 @@ class _MyAppState extends State<MyApp> {
 
     // IDの重複チェック
     bool isDuplicateId = false;
-    int newId = newData[0] as int;
+    int newId = newData["Id"] as int;
     for (Map<String, dynamic> existingData in dataList) {
-      int existingId = existingData[0] as int;
+      int existingId = existingData["Id"] as int;
       if (existingId == newId) {
         isDuplicateId = true;
         break;
@@ -77,7 +91,7 @@ class _MyAppState extends State<MyApp> {
       dataList.add(newData);
 
       // IDで昇順ソート
-      dataList.sort((a, b) => (a[0] as int).compareTo(b[0] as int));
+      dataList.sort((a, b) => (a["Id"] as int).compareTo(b["Id"] as int));
 
       await saveData();
       print('Data added and sorted successfully.');
@@ -214,7 +228,11 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    //addData([data.length + 1, 'Text 1', 'Text 2']);
+                    addData({
+                      "Id": dataList.length + 1,
+                      'DisplayWord': 'Text 1',
+                      'SearchWord': 'Text 2'
+                    });
                   });
                 },
                 child: const Text('Add Data'),
