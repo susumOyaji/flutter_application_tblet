@@ -32,9 +32,11 @@ class _MyAppState extends State<_MyHomePage> {
   bool isNameChanged = false;
   final TextEditingController _textEditingController = TextEditingController();
   final TextEditingController _textEditingController2 = TextEditingController();
-  late List<Map<String, dynamic>> newData;
+  late Map<String, dynamic> newData;
+  String Comment = "";
 
-  List<Map<String, dynamic>> dataList = [
+  List<Map<String, dynamic>> dataList = [];
+  List<Map<String, dynamic>> dataList1 = [
     {'Id': 1, 'DisplayWord': 'HiHi jets', 'SearchWord': 'HiHijets'},
     {'Id': 2, 'DisplayWord': 'HiHi jets', 'SearchWord': 'HiHijets'},
     {'Id': 3, 'DisplayWord': 'HiHi jets', 'SearchWord': 'HiHijets'},
@@ -51,9 +53,16 @@ class _MyAppState extends State<_MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String encodedData = jsonEncode(dataList);
     await prefs.setString('dataList', encodedData);
+    setState(() {
+      Comment = "On saveData";
+    });
   }
 
   Future<void> loadData() async {
+    setState(() {
+      dataList = []; //Load Data to init
+    });
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? encodedData = prefs.getString('dataList');
     if (encodedData != null) {
@@ -61,15 +70,13 @@ class _MyAppState extends State<_MyHomePage> {
 
       setState(() {
         dataList = decodedData.cast<Map<String, dynamic>>();
+        Comment = "All data has been loaded.";
+      });
+    } else {
+      setState(() {
+        Comment = "Non LoadData";
       });
     }
-  }
-
-  void addData1() {
-    setState(() {
-      dataList.add({'name': 'New Person', 'age': 20});
-      saveData();
-    });
   }
 
   Future<void> addData(Map<String, dynamic> newData) async {
@@ -94,10 +101,17 @@ class _MyAppState extends State<_MyHomePage> {
       dataList.sort((a, b) => (a["Id"] as int).compareTo(b["Id"] as int));
 
       await saveData();
-      print('Data added and sorted successfully.');
+      setState(() {
+        Comment = 'Data added and sorted successfully.';
+        print('Data added and sorted successfully.');
+      });
     } else {
-      print(
-          'Data with the same ID already exists. Duplicate registration prevented.');
+      setState(() {
+        Comment =
+            'Data with the same ID already exists. Duplicate registration prevented.';
+        print(
+            'Data with the same ID already exists. Duplicate registration prevented.');
+      });
     }
   }
 
@@ -112,6 +126,7 @@ class _MyAppState extends State<_MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // Remove data for the 'data' key.
     await prefs.remove('dataList');
+    loadData();
   }
 
   handleButtonLongPress(buttonIndex) {
@@ -153,17 +168,17 @@ class _MyAppState extends State<_MyHomePage> {
                 print('Entered Text 2: $enteredText2');
 
                 setState(() {
-                  newData = [
-                    {
-                      'Id': 1,
-                      'DisplayWord': 'HiHi jets',
-                      'SearchWord': 'HiHijets'
-                    },
-                  ];
+                  newData = {
+                    'Id': buttonIndex,
+                    'DisplayWord': enteredText,
+                    'SearchWord': enteredText2
+                  };
 
                   //data.add(newData);
                 });
-                saveData(); // データを保存
+                addData(newData);
+                //dataList.add(newData);
+                //saveData(); // データを保存
                 //addData([buttonIndex, enteredText,  enteredText2]);
                 Navigator.of(context).pop();
               },
@@ -187,6 +202,9 @@ class _MyAppState extends State<_MyHomePage> {
             // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
+                child: Text('Comment Data:$Comment'),
+              ),
+              Container(
                 padding: const EdgeInsets.all(16.0), // 余白を追加する場合は適宜調整してください
                 child: Column(
                   children: List.generate(2, (rowIndex) {
@@ -197,21 +215,6 @@ class _MyAppState extends State<_MyHomePage> {
                           child: ElevatedButton(
                             onPressed: () {
                               handleButtonLongPress(index);
-                              /*
-                                    setState(() {
-                                      if (isNameChanged &&
-                                          index < data.length) {
-                                        // 新たな名前に変更
-                                        buttonNames[index] = data[index][1];
-                                      } else {
-                                        // 初期値に戻す
-                                        buttonNames[index] =
-                                            'Button ${index + 1}';
-                                      }
-                                      isNameChanged =
-                                          !isNameChanged; // true to false or false to true
-                                    });
-                                    */
                             },
                             child: Text(dataList.length > index
                                 ? dataList[index]["DisplayWord"]
@@ -228,6 +231,15 @@ class _MyAppState extends State<_MyHomePage> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
+                    deleteData();
+                    //removeData(data.length);
+                  });
+                },
+                child: const Text('Remove All Data'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
                     addData({
                       "Id": dataList.length + 1,
                       'DisplayWord': 'Text 1',
@@ -235,16 +247,7 @@ class _MyAppState extends State<_MyHomePage> {
                     });
                   });
                 },
-                child: const Text('Add Data'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    deleteData();
-                    //removeData(data.length);
-                  });
-                },
-                child: const Text('Remove All Data'),
+                child: const Text('Add SampleData'),
               ),
             ],
           ),
