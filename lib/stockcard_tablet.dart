@@ -1,9 +1,10 @@
-//import 'dart:convert';
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:html/parser.dart' as parser;
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -43,6 +44,29 @@ class _MyHomePageState extends State<_MyHomePage> {
     ["6976", 100, 1801],
     ["3436", 0, 0],
   ];
+
+
+   Future<void> loadData() async {
+    setState(() {
+      data = []; //Load Data to init
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? encodedData = prefs.getString('dataList');
+    if (encodedData != null) {
+      List<dynamic> decodedData = jsonDecode(encodedData);
+
+      setState(() {
+        data = decodedData.cast<List<dynamic>>();
+        print("All data has been loaded.");
+      });
+    } else {
+      setState(() {
+        print("Non LoadData");
+      });
+    }
+  }
+
 
   Future<List<Map<String, dynamic>>> webfetch() async {
     List<Map<String, dynamic>> dataList = [];
@@ -188,7 +212,7 @@ class _MyHomePageState extends State<_MyHomePage> {
   @override
   void initState() {
     super.initState();
-
+    loadData();
     returnMap = webfetch();
   }
 
