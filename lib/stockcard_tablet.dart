@@ -38,26 +38,30 @@ class _MyHomePageState extends State<_MyHomePage> {
       const EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 0);
 
   Future<List<Map<String, dynamic>>>? returnMap;
+  List<Map<String, dynamic>> stockdataList = [];
 
-  static List<List<dynamic>> data = [
-    ["6758", 200, 1665],
-    ["6976", 100, 1801],
-    ["3436", 0, 0],
+  final TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController2 = TextEditingController();
+  final TextEditingController _textEditingController3 = TextEditingController();
+  /*
+  static List<Map<String, dynamic>> stockdata = [
+    {"Code": "6758", "Shares": 200, "Unitprice": 1665},
+    {"Code": "6976", "Shares": 100, "Unitprice": 1801},
+    {"Code": "3436", "Shares": 0, "Unitprice": 0},
   ];
-
-
-   Future<void> loadData() async {
+  */
+  Future<void> loadData() async {
     setState(() {
-      data = []; //Load Data to init
+      stockdataList = []; //Load Data to init
     });
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? encodedData = prefs.getString('dataList');
+    String? encodedData = prefs.getString('stockdataList');
     if (encodedData != null) {
       List<dynamic> decodedData = jsonDecode(encodedData);
 
       setState(() {
-        data = decodedData.cast<List<dynamic>>();
+        stockdataList = decodedData.cast<Map<String, dynamic>>();
         print("All data has been loaded.");
       });
     } else {
@@ -66,7 +70,6 @@ class _MyHomePageState extends State<_MyHomePage> {
       });
     }
   }
-
 
   Future<List<Map<String, dynamic>>> webfetch() async {
     List<Map<String, dynamic>> dataList = [];
@@ -124,8 +127,10 @@ class _MyHomePageState extends State<_MyHomePage> {
     // オブジェクトをリストに追加
     dataList.add(nkmapString);
 
-    for (int i = 0; i < data.length; i++) {
-      final anyurl = 'https://finance.yahoo.co.jp/quote/${data[i][0]}.T';
+    for (int i = 0; i < stockdataList.length; i++) {
+      print(stockdataList[i]["Code"]);
+      final anyurl =
+          'https://finance.yahoo.co.jp/quote/${stockdataList[i]["Code"]}.T';
       //final bodyresponse = await _fetchStd(url);
 
       final anyuri = Uri.parse(anyurl); // バックエンドのURLをURIオブジェクトに変換
@@ -148,14 +153,13 @@ class _MyHomePageState extends State<_MyHomePage> {
       String anyfirstChar = spanTexts[29].substring(0, 1);
       String anypolarity = anyfirstChar == '-' ? '-' : '+';
 
-      int intHolding = data[i][1];
-      String price=spanTexts[21].replaceAll('.', '');
+      int intHolding = stockdataList[i]["Shares"];
+      String price = spanTexts[21].replaceAll('.', '');
 
-      int intPrice = (price) == '---'
-          ? 0
-          : int.parse(price.replaceAll(',', ''));
+      int intPrice =
+          (price) == '---' ? 0 : int.parse(price.replaceAll(',', ''));
 
-      num banefits = intPrice - data[i][2];
+      num banefits = intPrice - stockdataList[i]["Unitprice"];
       String bBanefits = formatter.format(banefits); //banefits.toString();
 
       int evaluation = intHolding * intPrice;
@@ -186,7 +190,8 @@ class _MyHomePageState extends State<_MyHomePage> {
     final formatter = NumberFormat('#,###');
 
     for (var i = 0; i < anystock.length; i++) {
-      intinvestment = intinvestment + (data[i][1] * data[i][2]);
+      intinvestment = intinvestment +
+          (stockdataList[i]["Shares"] * stockdataList[i]["Unitprice"]);
     }
 
     String investment = formatter.format(intinvestment);
@@ -207,6 +212,115 @@ class _MyHomePageState extends State<_MyHomePage> {
     };
 
     return mapString;
+  }
+
+  Future<void> saveData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String encodedData = jsonEncode(stockdataList);
+    await prefs.setString('stockdataList', encodedData);
+    setState(() {
+      //Comment = "On saveData";
+    });
+  }
+
+  handleButtonLongPress() {
+    Map<String, dynamic> stocknewData = {};
+
+    // ここにボタンが押されたときの処理を追加する
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Button was Longpressed'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _textEditingController,
+                decoration: const InputDecoration(hintText: 'Code'),
+              ),
+              TextField(
+                controller: _textEditingController2,
+                decoration: const InputDecoration(hintText: 'Shares'),
+              ),
+              TextField(
+                controller: _textEditingController3,
+                decoration: const InputDecoration(hintText: 'Unitprice'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                String enteredText = _textEditingController.text;
+                String enteredText2 = _textEditingController2.text;
+                String enteredText3 = _textEditingController3.text;
+                // TODO: 入力されたテキストの処理
+                print('ButtonName: $enteredText');
+                print('Entered Text 2: $enteredText2');
+
+                setState(() {
+                  stocknewData = {
+                    'Code': int.parse(enteredText),
+                    'Shares': int.parse(enteredText2),
+                    'Unitprice': int.parse(enteredText3)
+                  };
+                });
+                addData(stocknewData);
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> addData(Map<String, dynamic> stocknewData) async {
+    // IDの重複チェック
+    bool isDuplicateId = false;
+    int newId = stocknewData["Code"] as int;
+    for (Map<String, dynamic> existingData in stockdataList) {
+      int existingId = existingData["Code"] as int;
+      if (existingId == newId) {
+        isDuplicateId = true;
+        break;
+      }
+    }
+
+    if (!isDuplicateId) {
+      // 新しいデータを追加
+      stockdataList.add(stocknewData);
+
+      // IDで昇順ソート
+      stockdataList
+          .sort((a, b) => (a["Code"] as int).compareTo(b["Code"] as int));
+
+      await saveData();
+      setState(() {
+        print('Data added and sorted successfully.');
+      });
+    } else {
+      setState(() {
+        print(
+            'Data with the same ID already exists. Duplicate registration prevented.');
+      });
+    }
+  }
+
+  void removeData(int index) {
+    setState(() {
+      stockdataList.removeAt(index);
+      saveData();
+    });
   }
 
   @override
@@ -491,7 +605,7 @@ class _MyHomePageState extends State<_MyHomePage> {
               ],
             ),
           ],
-        )
+        ),
       ]));
 
   ListView listView(dynamic anystock) => ListView.builder(
@@ -666,15 +780,30 @@ class _MyHomePageState extends State<_MyHomePage> {
                       child: stackmarketView(stdstock),
                     ),
                     Container(
-                      margin: stdmargin,
-                      width: 500,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.black,
-                      ),
-                      child: stackAssetView(asset),
-                    ),
+                        margin: stdmargin,
+                        width: 500,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: Colors.black,
+                        ),
+                        child: Stack(
+                          children: [
+                            stackAssetView(asset),
+                            Positioned(
+                              right: 5.0,
+                              bottom: 35.0,
+                              child: IconButton(
+                                icon: const Icon(Icons.grain),
+                                color: Colors.blueGrey,
+                                iconSize: 40,
+                                onPressed: () {
+                                  handleButtonLongPress();
+                                },
+                              ),
+                            ),
+                          ],
+                        )),
                     Container(
                       margin: stdmargin,
                       width: 500,
