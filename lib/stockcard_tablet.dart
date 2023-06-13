@@ -62,6 +62,7 @@ class _MyHomePageState extends State<_MyHomePage> {
 
       setState(() {
         stockdataList = decodedData.cast<Map<String, dynamic>>();
+        print(stockdataList);
         print("All data has been loaded.");
       });
     } else {
@@ -274,6 +275,7 @@ class _MyHomePageState extends State<_MyHomePage> {
                   };
                 });
                 addData(stocknewData);
+                //loadData();
 
                 Navigator.of(context).pop();
               },
@@ -287,9 +289,9 @@ class _MyHomePageState extends State<_MyHomePage> {
   Future<void> addData(Map<String, dynamic> stocknewData) async {
     // IDの重複チェック
     bool isDuplicateId = false;
-    int newId = stocknewData["Code"] as int;
+    int newId = stocknewData["Code"];
     for (Map<String, dynamic> existingData in stockdataList) {
-      int existingId = existingData["Code"] as int;
+      int existingId = existingData["Code"];
       if (existingId == newId) {
         isDuplicateId = true;
         break;
@@ -301,8 +303,7 @@ class _MyHomePageState extends State<_MyHomePage> {
       stockdataList.add(stocknewData);
 
       // IDで昇順ソート
-      stockdataList
-          .sort((a, b) => (a["Code"] as int).compareTo(b["Code"] as int));
+      stockdataList.sort((a, b) => (a["Code"]).compareTo(b["Code"]));
 
       await saveData();
       setState(() {
@@ -316,6 +317,81 @@ class _MyHomePageState extends State<_MyHomePage> {
     }
   }
 
+  void updateStockData(Map<String, dynamic> newData) {
+    for (int i = 0; i < stockdataList.length; i++) {
+      if (stockdataList[i]['Code'] == newData['Code']) {
+        stockdataList[i] = newData;
+        saveData();
+        break;
+      }
+    }
+  }
+
+  void editDialog(index) {
+    Map<String, dynamic> stocknewData = {};
+
+    // ここにボタンが押されたときの処理を追加する
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        _textEditingController.text = stockdataList[index]['Code'].toString();
+        _textEditingController2.text =
+            stockdataList[index]['Shares'].toString();
+        _textEditingController3.text =
+            stockdataList[index]['Unitprice'].toString();
+
+        return AlertDialog(
+          title: const Text('Button was Longpressed'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _textEditingController,
+                decoration: const InputDecoration(hintText: 'Code'),
+              ),
+              TextField(
+                controller: _textEditingController2,
+                decoration: const InputDecoration(hintText: 'Shares'),
+              ),
+              TextField(
+                controller: _textEditingController3,
+                decoration: const InputDecoration(hintText: 'Unitprice'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                String enteredText = _textEditingController.text;
+                String enteredText2 = _textEditingController2.text;
+                String enteredText3 = _textEditingController3.text;
+
+                setState(() {
+                  stocknewData = {
+                    'Code': int.parse(enteredText),
+                    'Shares': int.parse(enteredText2),
+                    'Unitprice': int.parse(enteredText3)
+                  };
+                });
+                updateStockData(stocknewData);
+                //addData(stocknewData);
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void removeData(int index) {
     setState(() {
       stockdataList.removeAt(index);
@@ -323,9 +399,16 @@ class _MyHomePageState extends State<_MyHomePage> {
     });
   }
 
+  Future<void> deleteData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Remove data for the 'data' key.
+    await prefs.remove('stockdataList');
+  }
+
   @override
   void initState() {
     super.initState();
+    //deleteData();
     loadData();
     returnMap = webfetch();
   }
@@ -643,7 +726,7 @@ class _MyHomePageState extends State<_MyHomePage> {
                       //_asyncEditDialog(context, index);
                     },
                     onLongPress: () {
-                      //alertDialog(index);
+                      editDialog(index);
                     },
                     child: Text("${anystock[index]['Code']}",
                         style: const TextStyle(
