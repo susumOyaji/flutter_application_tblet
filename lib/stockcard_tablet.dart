@@ -896,57 +896,73 @@ class _MyHomePageState extends State<_MyHomePage> {
                   ),
 
                   child: Column(children: <Widget>[
-                    ClipPath(
-                      clipper: MyCustomClipper(),
-                      child: Container(
-                        //margin: EdgeInsets.only(top: 0.0, right: 0.0),
-                        padding: const EdgeInsets.only(
-                            top: 0.0, left: 20.0, right: 0.0, bottom: 10.0),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              //Color(0xffb43af7),
-                              //Color(0x0B52067),
-                              Colors.white,
-                              //Colors.grey[800],
-                              Colors.grey.shade800,
-
-                              //Color(0xff6d2af7),
-                            ],
-                          ),
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
-                          ),
-                        ),
-                        child: const Row(
-                          //mainAxisAlignment: MainAxisAlignment.start,
-                          //mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Column(
-                              //mainAxisAlignment: MainAxisAlignment.start,
-                              //mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Stocks",
-                                  style: TextStyle(
-                                    fontSize: 30.0,
-                                    color: Colors.orange,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                    Container(
+                      child: Stack(
+                        children: [
+                          ClipPath(
+                            clipper: MyCustomClipper(),
+                            child: Container(
+                              //margin: EdgeInsets.only(top: 0.0, right: 0.0),
+                              padding: const EdgeInsets.only(
+                                  top: 0.0,
+                                  left: 20.0,
+                                  right: 0.0,
+                                  bottom: 10.0),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.white,
+                                    Colors.grey.shade800,
+                                  ],
                                 ),
-                              ],
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(10),
+                                  bottomRight: Radius.circular(10),
+                                ),
+                              ),
+                              child: const Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Stocks",
+                                        style: TextStyle(
+                                          fontSize: 30.0,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                          Positioned(
+                            right: 0.0,
+                            top: 0.0,
+                            child: ClipOval(
+                              child: Material(
+                                color: Colors.blue, // button color
+                                child: InkWell(
+                                  splashColor: Colors.red, // inkwell color
+                                  child: const SizedBox(
+                                      width: 45,
+                                      height: 45,
+                                      child: Icon(Icons.autorenew)),
+                                  onTap: () {
+                                    _refreshData();
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-
-                    //const SizedBox(de
-                    //  height: 20.0,
-                    //),
                     Container(
                       margin: stdmargin,
                       //width: 500,
@@ -1002,7 +1018,6 @@ class _MyHomePageState extends State<_MyHomePage> {
                       ),
                       child: listView(anystock),
                     ),
-                  
                   ]),
                 )
               ],
