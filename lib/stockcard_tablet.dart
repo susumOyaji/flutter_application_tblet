@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:html/parser.dart' as parser;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Clipper.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -50,6 +51,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     {"Code": "3436", "Shares": 0, "Unitprice": 0},
   ];
   */
+
   Future<void> loadData() async {
     setState(() {
       stockdataList = []; //Load Data to init
@@ -317,7 +319,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     }
   }
 
-  void updateStockData(Map<String, dynamic> newData) {
+  void updateStockData(Map<String, dynamic> newData) async {
     for (int i = 0; i < stockdataList.length; i++) {
       if (stockdataList[i]['Code'] == newData['Code']) {
         stockdataList[i] = newData;
@@ -327,7 +329,7 @@ class _MyHomePageState extends State<_MyHomePage> {
     }
   }
 
-  void editDialog(index) {
+  void editDialog(index) async {
     Map<String, dynamic> stocknewData = {};
 
     // ここにボタンが押されたときの処理を追加する
@@ -392,11 +394,33 @@ class _MyHomePageState extends State<_MyHomePage> {
     );
   }
 
-  void removeData(int index) {
-    setState(() {
-      stockdataList.removeAt(index);
-      saveData();
-    });
+  void removeData(int index) async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('AlertDialog Title'),
+            content: const Text('This is the content of the AlertDialog.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  setState(() {
+                    stockdataList.removeAt(index);
+                    saveData();
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
   }
 
   Future<void> deleteData() async {
@@ -691,6 +715,23 @@ class _MyHomePageState extends State<_MyHomePage> {
         ),
       ]));
 
+  Container status() => Container(
+      padding: const EdgeInsets.only(top: 5.0),
+      color: const Color.fromARGB(255, 1, 39, 3),
+      child: const Row(children: [
+        Icon(
+          Icons.currency_yen,
+          size: 10,
+          color: Colors.grey,
+        ),
+        Text("Msg.............",
+            style: TextStyle(
+              fontSize: 15.0,
+              color: Colors.yellow,
+              fontFamily: 'NotoSansJP',
+            )),
+      ]));
+
   ListView listView(dynamic anystock) => ListView.builder(
       scrollDirection: Axis.vertical,
       itemCount: anystock.length,
@@ -722,11 +763,14 @@ class _MyHomePageState extends State<_MyHomePage> {
                       shape: const CircleBorder(),
                     ),
                     onPressed: () {
-                      //runCommand();
-                      //_asyncEditDialog(context, index);
+                      editDialog(index);
+                      //loadData();
+                      _refreshData();
                     },
                     onLongPress: () {
-                      editDialog(index);
+                      removeData(index);
+                      //loadData();
+                      _refreshData();
                     },
                     child: Text("${anystock[index]['Code']}",
                         style: const TextStyle(
@@ -840,21 +884,72 @@ class _MyHomePageState extends State<_MyHomePage> {
             var anystock = stockDataList.sublist(2);
             var asset = getAsset(anystock);
             return Stack(
-              children: <Widget>[
+              children: [
                 Container(
-                  width: 650,
+                  //width: 650,
+                  padding: const EdgeInsets.all(10),
+                  width: MediaQuery.of(context).size.width * 0.99,
                   height: 600,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: Colors.orange,
                   ),
+
                   child: Column(children: <Widget>[
-                    const SizedBox(
-                      height: 20.0,
+                    ClipPath(
+                      clipper: MyCustomClipper(),
+                      child: Container(
+                        //margin: EdgeInsets.only(top: 0.0, right: 0.0),
+                        padding: const EdgeInsets.only(
+                            top: 0.0, left: 20.0, right: 0.0, bottom: 10.0),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              //Color(0xffb43af7),
+                              //Color(0x0B52067),
+                              Colors.white,
+                              //Colors.grey[800],
+                              Colors.grey.shade800,
+
+                              //Color(0xff6d2af7),
+                            ],
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                        ),
+                        child: const Row(
+                          //mainAxisAlignment: MainAxisAlignment.start,
+                          //mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Column(
+                              //mainAxisAlignment: MainAxisAlignment.start,
+                              //mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Stocks",
+                                  style: TextStyle(
+                                    fontSize: 30.0,
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
+
+                    //const SizedBox(de
+                    //  height: 20.0,
+                    //),
                     Container(
                       margin: stdmargin,
-                      width: 500,
+                      //width: 500,
                       height: 100,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
@@ -864,7 +959,7 @@ class _MyHomePageState extends State<_MyHomePage> {
                     ),
                     Container(
                         margin: stdmargin,
-                        width: 500,
+                        //width: 500,
                         height: 100,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
@@ -889,7 +984,17 @@ class _MyHomePageState extends State<_MyHomePage> {
                         )),
                     Container(
                       margin: stdmargin,
-                      width: 500,
+                      //width: 500,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.black,
+                      ),
+                      child: status(),
+                    ),
+                    Container(
+                      margin: stdmargin,
+                      //width: 500,
                       height: 220,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
@@ -897,6 +1002,7 @@ class _MyHomePageState extends State<_MyHomePage> {
                       ),
                       child: listView(anystock),
                     ),
+                  
                   ]),
                 )
               ],
