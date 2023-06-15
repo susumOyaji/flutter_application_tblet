@@ -51,6 +51,32 @@ class _MyHomePageState extends State<_MyHomePage> {
     {"Code": "3436", "Shares": 0, "Unitprice": 0},
   ];
   */
+  double _getContainerWidth(BuildContext context) {
+    // スマートフォンの場合は画面幅の70%、タブレットの場合は画面幅の50%を返す
+    if (MediaQuery.of(context).size.shortestSide < 600) {
+      return MediaQuery.of(context).size.width * 0.7;
+    } else {
+      return MediaQuery.of(context).size.width * 0.8;
+    }
+  }
+
+  double _getContainerHeight(BuildContext context) {
+    // スマートフォンの場合は画面高さの30%、タブレットの場合は画面高さの20%を返す
+    if (MediaQuery.of(context).size.shortestSide < 600) {
+      return MediaQuery.of(context).size.height * 0.3;
+    } else {
+      return MediaQuery.of(context).size.height * 0.2;
+    }
+  }
+
+  double _getFontSize(BuildContext context) {
+    // スマートフォンの場合は画面幅の5%、タブレットの場合は画面幅の3%をフォントサイズとして返す
+    if (MediaQuery.of(context).size.shortestSide < 600) {
+      return MediaQuery.of(context).size.width * 0.05;
+    } else {
+      return MediaQuery.of(context).size.width * 0.03;
+    }
+  }
 
   Future<void> loadData() async {
     setState(() {
@@ -888,7 +914,9 @@ class _MyHomePageState extends State<_MyHomePage> {
                 Container(
                   //width: 650,
                   padding: const EdgeInsets.all(10),
-                  width: MediaQuery.of(context).size.width * 0.99,
+                  width: _getContainerWidth(context),
+                  //height: _getContainerHeight(context),
+                  //width: MediaQuery.of(context).size.width * 0.99,
                   height: 600,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
