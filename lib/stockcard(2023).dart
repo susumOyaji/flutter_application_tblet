@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:html/parser.dart' as parser;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'Clipper.dart';
 
 void main() async {
@@ -41,6 +42,9 @@ class _MyHomePageState extends State<_MyHomePage> {
   Future<List<Map<String, dynamic>>>? returnMap;
   List<Map<String, dynamic>> stockdataList = [];
 
+  String formattedDate = "";
+  String moreHours = "";
+
   final TextEditingController _textEditingController = TextEditingController();
   final TextEditingController _textEditingController2 = TextEditingController();
   final TextEditingController _textEditingController3 = TextEditingController();
@@ -51,6 +55,49 @@ class _MyHomePageState extends State<_MyHomePage> {
     {"Code": "3436", "Shares": 0, "Unitprice": 0},
   ];
   */
+
+  String formatDuration(Duration duration) {
+    String twoDigits(int n) {
+      if (n >= 10) return "$n";
+      return "0$n";
+    }
+
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    return "${twoDigits(duration.inHours)}:${twoDigitMinutes}";
+  }
+
+  String getFormattedOpentime() {
+    DateTime now = DateTime.now();
+    // 13:00までの時間差を計算
+    DateTime targetTime1 = DateTime(now.year, now.month, now.day, 15, 0);
+    Duration timeDiff1 = targetTime1.difference(now);
+
+    // 13:00から明日の9:00までの時間差を計算
+    DateTime nextDay = now.add(Duration(days: 1));
+    DateTime targetTime2 =
+        DateTime(nextDay.year, nextDay.month, nextDay.day, 9, 0);
+    Duration timeDiff2 = targetTime2.difference(targetTime1);
+
+    // 時間差を24時間表記で表示
+    String formattedDiff1 = formatDuration(timeDiff1);
+    String formattedDiff2 = formatDuration(timeDiff2);
+
+    print("現在の時刻から13:00までの時間差: $formattedDiff1");
+    print("13:00から明日の9:00までの時間差: $formattedDiff2");
+
+    String result = timeDiff1 > timeDiff2
+        ? "現在の時刻から15:00までの時間差の方が大きいです"
+        : timeDiff1 < timeDiff2
+            ? "15:00から明日の9:00までの時間差の方が大きいです"
+            : "timeDiff1とtimeDiff2は同じです";
+    return result;
+  }
+
+  String getFormattedDate() {
+    DateTime now = DateTime.now();
+    return DateFormat('yyyy-MM-dd').format(now);
+  }
+
   double _getContainerWidth(BuildContext context) {
     // スマートフォンの場合は画面幅の70%、タブレットの場合は画面幅の50%を返す
     if (MediaQuery.of(context).size.shortestSide < 600) {
@@ -458,6 +505,8 @@ class _MyHomePageState extends State<_MyHomePage> {
   @override
   void initState() {
     super.initState();
+    formattedDate = getFormattedDate();
+    moreHours = getFormattedOpentime();
     //deleteData();
     loadData();
     returnMap = webfetch();
@@ -485,7 +534,7 @@ class _MyHomePageState extends State<_MyHomePage> {
       child: Row(children: [
         const Icon(
           Icons.trending_up,
-          size: 60,
+          size: 42,
           color: Colors.grey,
         ),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -639,18 +688,20 @@ class _MyHomePageState extends State<_MyHomePage> {
       child: Row(children: [
         const Icon(
           Icons.currency_yen,
-          size: 60,
+          size: 42,
           color: Colors.grey,
         ),
         Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text.rich(
               TextSpan(
                 text: 'Market capitalization',
                 style: TextStyle(
+                  fontSize: 35.0,
                   color: Colors.grey,
-                  fontSize: 30,
+                  fontFamily: 'NotoSansJP',
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ),
@@ -909,157 +960,180 @@ class _MyHomePageState extends State<_MyHomePage> {
             var stdstock = stockDataList;
             var anystock = stockDataList.sublist(2);
             var asset = getAsset(anystock);
-            return Stack(
-              children: [
+            return Column(
+              children: <Widget>[
                 Container(
-                  //width: 650,
-                  padding: const EdgeInsets.all(10),
-                  //width: _getContainerWidth(context),
-                  //height: _getContainerHeight(context),
-                  //width: MediaQuery.of(context).size.width * 0.99,
-                  height: 600,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.orange,
-                  ),
-
-                  child: Column(children: <Widget>[
-                    Container(
-                      child: Stack(
-                        children: [
-                          ClipPath(
-                            clipper: MyCustomClipper(),
-                            child: Container(
-                              //margin: EdgeInsets.only(top: 0.0, right: 0.0),
-                              padding: const EdgeInsets.only(
-                                  top: 0.0,
-                                  left: 20.0,
-                                  right: 20.0,
-                                  bottom: 10.0),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.white,
-                                    Colors.grey.shade800,
-                                  ],
-                                ),
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(10),
-                                  bottomRight: Radius.circular(10),
-                                ),
-                              ),
-                              child: const Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "Stocks",
-                                        style: TextStyle(
-                                          fontSize: 30.0,
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        "Stocks",
-                                        style: TextStyle(
-                                          fontSize: 30.0,
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 25,
-                                        height: 10,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 0.0,
-                            top: 0.0,
-                            child: ClipOval(
-                              child: Material(
-                                color: Colors.blue, // button color
-                                child: InkWell(
-                                  splashColor: Colors.red, // inkwell color
-                                  child: const SizedBox(
-                                      width: 45,
-                                      height: 45,
-                                      child: Icon(Icons.autorenew)),
-                                  onTap: () {
-                                    _refreshData();
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: stdmargin,
-                      //width: 500,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.black,
-                      ),
-                      child: stackmarketView(stdstock),
-                    ),
-                    Container(
-                        margin: stdmargin,
-                        //width: 500,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
+                  //width: 280,
+                  margin: const EdgeInsets.all(0.0),
+                  width: _getContainerWidth(context),
+                  padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                  child: Stack(
+                    children: [
+                      Container(
+                          padding: const EdgeInsets.all(10),
+                          width: MediaQuery.of(context).size.width,
                           color: Colors.black,
-                        ),
-                        child: Stack(
-                          children: [
-                            stackAssetView(asset),
-                            Positioned(
-                              right: 5.0,
-                              bottom: 35.0,
-                              child: IconButton(
-                                icon: const Icon(Icons.grain),
-                                color: Colors.blueGrey,
-                                iconSize: 40,
-                                onPressed: () {
-                                  handleButtonLongPress();
-                                },
-                              ),
+                          child: SafeArea(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  GestureDetector(
+                                    child: ClipPath(
+                                      clipper: MyCustomClipper(),
+                                      child: Container(
+                                          //margin: EdgeInsets.only(top: 0.0, right: 0.0),
+                                          padding: const EdgeInsets.only(
+                                              top: 0.0,
+                                              left: 20.0,
+                                              right: 0.0,
+                                              bottom: 10.0),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.white,
+                                                Colors.grey.shade800,
+                                              ],
+                                            ),
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                              topRight: Radius.circular(10),
+                                              bottomRight: Radius.circular(10),
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: <Widget>[
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "Stocks",
+                                                    style: TextStyle(
+                                                      fontSize: 30.0,
+                                                      color: Colors.orange,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          )),
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: stdmargin,
+                                    //width: 500,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      color: Colors.black,
+                                    ),
+                                    child: stackmarketView(stdstock),
+                                  ),
+                                  Container(
+                                    margin: stdmargin,
+                                    //width: 500,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      color: Colors.black,
+                                    ),
+                                    child: stackAssetView(asset),
+                                  ),
+                                  Container(
+                                      margin: const EdgeInsets.only(
+                                          top: 10.0, right: 0.0, bottom: 0.0),
+                                      padding: const EdgeInsets.all(5.0),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.black,
+                                            Colors.grey.shade800,
+                                          ],
+                                        ),
+                                        borderRadius: const BorderRadius.only(
+                                          topRight: Radius.circular(10),
+                                          bottomRight: Radius.circular(10),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "${moreHours}",
+                                            style: const TextStyle(
+                                              fontSize: 18.0,
+                                              fontFamily: 'NotoSansJP',
+                                              //fontWeight: FontWeight.w900,
+                                              color: Colors.yellowAccent,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      )),
+                                  Container(
+                                    margin: stdmargin,
+                                    //width: 500,
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      color: Colors.black,
+                                    ),
+                                    child: listView(anystock),
+                                  ),
+                                ]),
+                          )),
+                      Positioned(
+                        right: 150.0,
+                        top: 45.0,
+                        child: Text(
+                            "Today's date: $formattedDate" /*+ '  ' + now.month.toString()*/,
+                            style: const TextStyle(
+                                color: Colors.yellow,
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                      Positioned(
+                        right: 5.0,
+                        top: 34.0,
+                        child: ClipOval(
+                          child: Material(
+                            color: Colors.orange, // button color
+                            child: InkWell(
+                              splashColor: Colors.red, // inkwell color
+                              child: const SizedBox(
+                                  width: 45,
+                                  height: 45,
+                                  child: Icon(Icons.autorenew)),
+                              onTap: () {
+                                _refreshData();
+                              },
                             ),
-                          ],
-                        )),
-                    Container(
-                      margin: stdmargin,
-                      //width: 500,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.black,
+                          ),
+                        ),
                       ),
-                      child: status(),
-                    ),
-                    Container(
-                      margin: stdmargin,
-                      //width: 500,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.black,
+                      Positioned(
+                        right: 18.0,
+                        bottom: 330.0,
+                        child: IconButton(
+                          icon: const Icon(Icons.grain),
+                          color: Colors.blueGrey,
+                          iconSize: 40,
+                          onPressed: () {
+                            handleButtonLongPress();
+                          },
+                        ),
                       ),
-                      child: listView(anystock),
-                    ),
-                  ]),
-                )
+                    ],
+                  ),
+                ),
               ],
             );
           },
