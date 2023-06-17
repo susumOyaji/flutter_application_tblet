@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:html/parser.dart' as parser;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 import 'Clipper.dart';
 
 void main() async {
@@ -82,8 +81,8 @@ class _MyHomePageState extends State<_MyHomePage> {
     String formattedDiff1 = formatDuration(timeDiff1);
     String formattedDiff2 = formatDuration(timeDiff2);
 
-    print("現在の時刻から13:00までの時間差: $formattedDiff1");
-    print("13:00から明日の9:00までの時間差: $formattedDiff2");
+    print("現在の時刻から15:00までの時間差: $formattedDiff1");
+    print("15:00から明日の9:00までの時間差: $formattedDiff2");
 
     String result = timeDiff1 > timeDiff2
         ? "現在の時刻から15:00までの時間差の方が大きいです"
